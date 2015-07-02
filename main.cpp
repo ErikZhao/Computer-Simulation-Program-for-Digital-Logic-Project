@@ -7,6 +7,7 @@
 #include "syn.h"
 #include "netlist.h"
 
+std::string file;
 
 int main(int argc, char *argv[])
 {
@@ -16,6 +17,8 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    file = argv[1];
+
     std::string module_name;
     evl_wires wires;
     evl_components comps;
@@ -23,16 +26,15 @@ int main(int argc, char *argv[])
     	return -1;
 
     evl_wires_table wires_table = make_wires_table(wires);
-
     netlist nl;
     if(!nl.create(wires, comps, wires_table))
     	return -1;
     //netlist nl(wires, comps, wires_table);
 
-    std::string nl_file = std::string(argv[1])+".sim_out.evl_output";
+    std::string nl_file = std::string(argv[1])+".netlist";
     nl.save(nl_file, module_name); //save the netlist for Project 3
 
-    //nl.simulate(1000); // simulate 1000 cycles for Porject 4
+    nl.simulate(1000); // simulate 1000 cycles for Porject 4
 
 
     //project 2 main function
