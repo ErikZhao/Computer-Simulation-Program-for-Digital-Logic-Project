@@ -56,6 +56,7 @@ typedef std::list<evl_statement> evl_statements;
 	void display_statements(std::ostream &out,	const evl_statements &statements);
 	bool store_statements_to_file(std::string file_name, const evl_statements &statements) ;
 
+	bool parse_evl_file(std::string evl_file, std::string &module_name, evl_wires &wires, evl_components &comps);
 
 #endif
 

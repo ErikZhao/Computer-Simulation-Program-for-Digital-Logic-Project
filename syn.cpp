@@ -577,39 +577,64 @@ bool store_statements_to_file(std::string file_name, const evl_statements &state
 	return true;
 }
 
-/*
-int main(int argc, char *argv[])
-{
-    if (argc < 2)
-    {
-        std::cerr << "You should provide a file name." << std::endl;
-        return -1;
-    }
+bool parse_evl_file(std::string evl_file, std::string &module_name, evl_wires &wires, evl_components &comps){
 
-    std::string evl_file = argv[1];
     evl_tokens tokens;
     evl_statements statements;
+
 
     if (!extract_tokens_from_file(evl_file, tokens)) {
     	return -1;
     }
-    display_tokens(std::cout, tokens);
+	for(; !tokens.empty();){
+			//generate one statement per iteration
+			evl_token token = tokens.front();
 
-    if (!store_tokens_to_file(evl_file+".tokens", tokens)) {
-    	return -1;
-    }
+		if (token.str == "module") { // MODULE statement
+				evl_statement module;
+				module.type = evl_statement::MODULE;
 
-    if(!group_tokens_into_statements(statements, tokens)){
-    	return -1;
-    }
+				if (!move_tokens_to_statement(module.tokens, tokens))
+					return false;
+				evl_tokens::const_iterator it = module.tokens.begin();
+				module_name = (*++it).str;
 
-    display_statements(std::cout, statements);
+				statements.push_back(module);
+		}
 
-    if(!store_statements_to_file(evl_file+".syntax", statements)){
-    	return -1;
-    }
+		else if (token.str == "endmodule") { // ENDMODULE statement
+			evl_statement endmodule;
+			endmodule.type = evl_statement::ENDMODULE;
+			endmodule.tokens.push_back(token);
+			tokens.erase(tokens.begin());
+			statements.push_back(endmodule);
+		}
 
-    return 0;
+		else if (token.str == "wire") { // WIRE statement
+					evl_statement wire;
+					wire.type = evl_statement::WIRE;
+
+					if (!move_tokens_to_statement(wire.tokens, tokens))
+						return false;
+					if(!process_wire_statement(wires, wire))
+						return false;
+
+					statements.push_back(wire);
+		}
+
+		else  { // COMPONENT statement
+					evl_statement component;
+					component.type = evl_statement::COMPONENT;
+					if (!move_tokens_to_statement(component.tokens, tokens))
+						return false;
+					if(!process_component_statement(comps, component))
+						return false;
+
+					statements.push_back(component);
+		}
+
+	}
+
+
+    return true;
 }
-
-*/
